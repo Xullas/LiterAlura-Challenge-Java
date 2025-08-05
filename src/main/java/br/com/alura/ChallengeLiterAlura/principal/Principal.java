@@ -1,4 +1,4 @@
-package br.com.alura.ChallengeLiterAlura.Principal;
+package br.com.alura.ChallengeLiterAlura.principal;
 
 import lombok.AllArgsConstructor;
 import org.springframework.context.ConfigurableApplicationContext;
