@@ -1,6 +1,7 @@
 package br.com.alura.ChallengeLiterAlura;
 
 import br.com.alura.ChallengeLiterAlura.principal.Principal;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -21,7 +22,7 @@ public class ChallengeLiterAluraApplication implements CommandLineRunner {
 	}
 
 	@Override
-	public void run(String... args){
+	public void run(String... args) throws JsonProcessingException {
 		Principal principal = new Principal(context);
 		principal.exibeMenu();
 	}
