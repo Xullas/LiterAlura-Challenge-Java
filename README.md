@@ -15,7 +15,7 @@
     - [4.1. Uso de `JdbcTemplate` em vez de Spring Data JPA](#-41-uso-de-jdbctemplate-em-vez-de-spring-data-jpa)
     - [4.2. Ambiente de Desenvolvimento com Docker](#-42-ambiente-de-desenvolvimento-com-docker)
 - [5. Acesso ao Projeto](#-5-acesso-ao-projeto)
-- [6. Abrindo e Executando o Projeto](#-6-abrindo-e-executando-o-projeto)
+- [6. Abrindo e Executando o Projeto](#%EF%B8%8F-6-abrindo-e-executando-o-projeto)
 - [7. Estrutura do Projeto](#-7-estrutura-do-projeto)
 - [8. Contribuição](#-8-contribuição)
 
@@ -75,7 +75,7 @@ Diferente da recomendação do curso de instalar o PostgreSQL diretamente na má
 -   Maven 3.8 ou superior
 -   Docker e Docker Compose
 
-## ▶️ 6. Abrindo e Executando o Projeto
+## ⚙️ 6. Abrindo e Executando o Projeto
 
 Siga os passos abaixo para executar a aplicação:
 
