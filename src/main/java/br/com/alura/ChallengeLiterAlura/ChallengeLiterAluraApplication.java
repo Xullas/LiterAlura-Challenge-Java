@@ -1,29 +1,28 @@
 package br.com.alura.ChallengeLiterAlura;
 
 import br.com.alura.ChallengeLiterAlura.principal.Principal;
-import com.fasterxml.jackson.core.JsonProcessingException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.ConfigurableApplicationContext;
 
 
 @SpringBootApplication
 public class ChallengeLiterAluraApplication implements CommandLineRunner {
 
-	private final ConfigurableApplicationContext context;
+	@Autowired
+	private Principal principal;
 
-	public ChallengeLiterAluraApplication(ConfigurableApplicationContext context) {
-		this.context = context;
-	}
 
 	public static void main(String[] args) {
-		SpringApplication.run(ChallengeLiterAluraApplication.class, args);
+		SpringApplication app = new SpringApplication(ChallengeLiterAluraApplication.class);
+		app.setWebApplicationType(WebApplicationType.NONE);
+		app.run(args);
 	}
 
 	@Override
-	public void run(String... args) throws JsonProcessingException {
-		Principal principal = new Principal(context);
+	public void run(String... args){
 		principal.exibeMenu();
 	}
 }

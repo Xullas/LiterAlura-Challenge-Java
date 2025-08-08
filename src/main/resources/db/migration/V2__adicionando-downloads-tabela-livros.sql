@@ -1,0 +1,1 @@
+ALTER TABLE livros ADD COLUMN numero_de_downloads INT;
