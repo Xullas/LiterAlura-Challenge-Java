@@ -22,7 +22,6 @@ public class Principal {
     @Autowired
     private AutorService autorService;
 
-    private final String URL_BASE = "https://gutendex.com/books/?search=";
 
     public void exibeMenu() {
 
@@ -45,8 +44,7 @@ public class Principal {
                 case 1:
                     System.out.println("Digite o nome do livro: ");
                     String nomeLivro = sc.nextLine().toLowerCase().replace(" ", "%20").trim();
-                    String json = ConsumoAPI.obterDados(URL_BASE + nomeLivro);
-                    DadosBusca busca = ConverteDados.obterDados(json, DadosBusca.class);
+                    DadosBusca busca = livroService.getDadosBusca(nomeLivro);
                     Livro livro;
                     if (busca != null && !busca.getLivros().isEmpty()) {
                         livro = busca.getLivros().get(0);
@@ -82,7 +80,7 @@ public class Principal {
                     if (!todosOsAutoresVivos.isEmpty()) {
                         todosOsAutoresVivos.forEach(Autor::imprimirDados);
                     } else {
-                        System.out.printf("\nNenhum Autor vivo neste ano foi encontrado.\n");
+                        System.out.println("\nNenhum Autor vivo neste ano foi encontrado.\n");
                     }
                     break;
                 case 5:
