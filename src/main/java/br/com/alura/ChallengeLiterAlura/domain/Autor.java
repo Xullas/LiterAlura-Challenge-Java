@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
+import java.util.List;
+
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -19,5 +21,17 @@ public class Autor {
     private int anoNascimento;
 
     @JsonProperty("death_year")
-    private int anoMorte;
+    private Integer anoMorte;
+
+    private List<String> titulosDosLivros;
+
+
+    public void imprimirDados(){
+        System.out.println("----- AUTOR -----");
+        System.out.println("Nome: " + this.nome);
+        System.out.println("Ano de nascimento:  " + this.anoNascimento);
+        System.out.println("Ano de falecimento:  " + this.anoMorte);
+        System.out.println("Livros:  " + this.titulosDosLivros);
+        System.out.println("-----------------\n");
+    }
 }

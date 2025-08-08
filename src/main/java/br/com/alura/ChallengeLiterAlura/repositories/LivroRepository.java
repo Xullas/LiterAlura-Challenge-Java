@@ -2,14 +2,21 @@ package br.com.alura.ChallengeLiterAlura.repositories;
 
 import br.com.alura.ChallengeLiterAlura.domain.Autor;
 import br.com.alura.ChallengeLiterAlura.domain.Livro;
+import br.com.alura.ChallengeLiterAlura.service.ConverteDados;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
 
 @Repository
-public class LivroRepository implements Repositories<Livro, Long> {
+public class LivroRepository{
+
+    @Autowired
+    private AutorRepository autorRepository;
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -18,15 +25,13 @@ public class LivroRepository implements Repositories<Livro, Long> {
     }
 
 
-    @Override
     @Transactional
     public void create(Livro livro){
-        String sql = "INSERT INTO livros (id, titulo) VALUES (?, ?) ON CONFLICT DO NOTHING";
-        jdbcTemplate.update(sql, livro.getId(), livro.getTitulo());
+        String sql = "INSERT INTO livros (id, titulo, numero_de_downloads) VALUES (?, ?, ?) ON CONFLICT DO NOTHING";
+        jdbcTemplate.update(sql, livro.getId(), livro.getTitulo(), livro.getNumeroDownload());
 
         for (Autor autor : livro.getAutores()) {
-            String sqlAutor = "INSERT INTO autores (nome, ano_nascimento, ano_morte) VALUES (?, ?, ?) ON CONFLICT DO NOTHING;";
-            jdbcTemplate.update(sqlAutor, autor.getNome(), autor.getAnoNascimento(), autor.getAnoMorte());
+            autorRepository.create(autor);
         }
 
         for (Autor autor: livro.getAutores()){
@@ -45,24 +50,83 @@ public class LivroRepository implements Repositories<Livro, Long> {
         }
     }
 
-    @Override
     public List<Livro> findAll() {
-        return List.of();
+        String sql = """
+                SELECT
+                l.id,
+                l.titulo,
+                l.numero_de_downloads,
+                COALESCE(
+                    (SELECT json_agg(json_build_object('name', a.nome, 'birth_year', a.ano_nascimento, 'death_year', a.ano_morte))
+                    FROM livro_autor la JOIN autores a ON la.autor_nome = a.nome AND la.autor_ano_nascimento = a.ano_nascimento
+                    WHERE la.livro_id = l.id),
+                    '[]'::json
+                ) AS "autores",
+                COALESCE(
+                    (SELECT json_agg(resumo) FROM livro_resumos WHERE livro_id = l.id),
+                    '[]'::json
+                ) AS "resumos",
+                COALESCE(
+                    (SELECT json_agg(idioma) FROM livro_idiomas WHERE livro_id = l.id),
+                    '[]'::json
+                ) AS "idiomas"
+                FROM
+                    livros l
+                ORDER BY
+                    l.id;""";
+        return jdbcTemplate.query(sql, (resultSet, i) -> getLivro(resultSet));
     }
 
-    @Override
-    public int update(Livro entity, Long sku) {
-        return 0;
+    public List<Livro> findByIdioma(String idioma) {
+        String sql = """
+                SELECT
+                l.id,
+                l.titulo,
+                l.numero_de_downloads,
+                COALESCE(
+                    (SELECT json_agg(json_build_object('name', a.nome, 'birth_year', a.ano_nascimento, 'death_year', a.ano_morte))
+                    FROM livro_autor la JOIN autores a ON la.autor_nome = a.nome AND la.autor_ano_nascimento = a.ano_nascimento
+                    WHERE la.livro_id = l.id),
+                    '[]'::json
+                ) AS "autores",
+                COALESCE(
+                    (SELECT json_agg(resumo) FROM livro_resumos WHERE livro_id = l.id),
+                    '[]'::json
+                ) AS "resumos",
+                COALESCE(
+                    (SELECT json_agg(idioma) FROM livro_idiomas WHERE livro_id = l.id),
+                    '[]'::json
+                ) AS "idiomas"
+                FROM
+                    livros l
+                 WHERE
+                    EXISTS (
+                        SELECT 1
+                        FROM livro_idiomas li
+                        WHERE li.livro_id = l.id AND li.idioma = ?
+                        )
+                ORDER BY
+                    l.id;""";
+        return jdbcTemplate.query(sql, (resultSet, i) -> getLivro(resultSet), idioma);
     }
 
-    @Override
-    public Livro findById(Long sku) {
-        return null;
-    }
+    private Livro getLivro(ResultSet resultSet) throws SQLException {
+        String autorJson = resultSet.getString("autores");
+        String resumoJson = resultSet.getString("resumos");
+        String idiomaJson = resultSet.getString("idiomas");
 
-    @Override
-    public int delete(Long sku) {
-        return 0;
+        List<Autor> autores = ConverteDados.obterLista(autorJson, Autor.class);
+        List<String> resumos = ConverteDados.obterLista(resumoJson, String.class);
+        List<String> idiomas = ConverteDados.obterLista(idiomaJson, String.class);
+
+        return Livro.builder()
+                .id(resultSet.getInt("id"))
+                .titulo(resultSet.getString("titulo"))
+                .numeroDownload(resultSet.getInt("numero_de_downloads"))
+                .autores(autores)
+                .resumo(resumos)
+                .idiomas(idiomas)
+                .build();
     }
 }
 
