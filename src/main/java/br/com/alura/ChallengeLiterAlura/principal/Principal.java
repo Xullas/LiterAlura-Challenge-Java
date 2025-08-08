@@ -4,26 +4,30 @@ import br.com.alura.ChallengeLiterAlura.domain.DadosBusca;
 import br.com.alura.ChallengeLiterAlura.domain.Livro;
 import br.com.alura.ChallengeLiterAlura.service.ConsumoAPI;
 import br.com.alura.ChallengeLiterAlura.service.ConverteDados;
+import br.com.alura.ChallengeLiterAlura.service.LivroService;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import jakarta.annotation.PostConstruct;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.stereotype.Component;
 
 import java.util.Scanner;
 
+@Component
 public class Principal {
 
     private final ConfigurableApplicationContext context;
 
-    private final String URL_BASE = "https://gutendex.com/books/?search=Dom%20Casmurro";
+    private final String URL_BASE = "https://gutendex.com/books/?search=";
 
     public Principal (ConfigurableApplicationContext context) {
         this.context = context;
     }
 
-
     //https://gutendex.com/books/?search=Dom%20Casmurro
-
+    @PostConstruct
     public void exibeMenu() throws JsonProcessingException {
 
+        LivroService livroService = context.getBean(LivroService.class);
 
         Scanner sc = new Scanner(System.in);
         int escolha = -1;
@@ -42,13 +46,15 @@ public class Principal {
 
             switch (escolha) {
                 case 1:
-                    String json = ConsumoAPI.obterDados(URL_BASE);
+                    System.out.println("Digite o nome do livro: ");
+                    String nomeLivro = sc.nextLine().toLowerCase().replace(" ", "%20").trim();
+                    String json = ConsumoAPI.obterDados(URL_BASE + nomeLivro);
                     DadosBusca busca = ConverteDados.obterDados(json, DadosBusca.class);
                     Livro livro = new Livro();
                     if (busca != null && !busca.getLivros().isEmpty()) {
                         livro = busca.getLivros().get(0);
                     }
-                    System.out.println();
+                    livroService.createLivro(livro);
                     break;
                 case 2:
                     break;
@@ -58,8 +64,6 @@ public class Principal {
                     break;
                 case 5:
                     break;
-                default:
-                    throw new IllegalStateException("Unexpected value: " + escolha);
             }
 
         }
